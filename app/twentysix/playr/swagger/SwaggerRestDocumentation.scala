@@ -1,11 +1,12 @@
-package twentysix.playr
+package twentysix.playr.swagger
 
 import play.core.Router
 import scala.runtime.AbstractPartialFunction
+import scala.reflect.runtime.universe._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.Logger
-import scala.reflect.runtime.universe._
+import twentysix.playr._
 
 case class SwaggerResource(path: String, description: String)
 object SwaggerResource {
@@ -28,16 +29,7 @@ object SwaggerApi {
   implicit val jsonFormat = Json.format[SwaggerApi]
 }
 
-class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="1.0") extends Router.Routes {
-  protected var _prefix: String =""
-
-  def setPrefix(newPrefix: String) = {
-    _prefix = newPrefix
-  }
-
-  def prefix = _prefix
-  def documentation = Nil
-
+class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="1.0") extends SimpleRouter {
   private val SubPathExpression = "^(/([^/]+)).*$".r
 
   val apiMap = restApi.routeResources("").map{ info =>
@@ -87,7 +79,7 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
   }
 
   def renderSwaggerUi = Action {
-    Results.Ok(views.html.swagger(this.prefix+".json"))
+    Results.Ok(views.html.swagger(this.prefix+".json", this.prefix+"/ui"))
   }
 
   def resourceDesc(path: String, routeInfo: RestRouteInfo) = Action {
@@ -102,33 +94,15 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
   }
 
   private val ApiListing = "^\\.json(/.*)$".r
+  private val UiAsset = "^/ui/(.*)$".r
 
-  def routes = new AbstractPartialFunction[RequestHeader, Handler] {
-    override def applyOrElse[A <: RequestHeader, B>: Handler]( requestHeader: A, default: A => B) = {
-      if(requestHeader.path.startsWith(_prefix)) {
-        val path = requestHeader.path.drop(_prefix.length())
-        path match {
-          case ".json"         => resourceListing
-          case ""|"/"          => renderSwaggerUi
-          case ApiListing(api) => apiMap.get(api).map(resourceDesc(api, _)).getOrElse(default(requestHeader))
-          case _               => default(requestHeader)
-        }
-      } else {
-        default(requestHeader)
+  def routeRequest(header: RequestHeader, path: String, method: String): Option[Handler] = {
+      path match {
+        case ".json"         => Some(resourceListing)
+        case ""|"/"          => Some(renderSwaggerUi)
+        case ApiListing(api) => apiMap.get(api).map(resourceDesc(api, _))
+        case UiAsset(asset)  => Some(controllers.Assets.at("/public/swagger-ui/dist", asset))
+        case _               => None
       }
-    }
-
-    def isDefinedAt(requestHeader: RequestHeader): Boolean = {
-      if(requestHeader.path.startsWith(_prefix)) {
-        val path = requestHeader.path.drop(_prefix.length())
-
-        path match {
-          case ""|"/" => true
-          case _      => false
-        }
-      } else {
-        false
-      }
-    }
   }
 }
