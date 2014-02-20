@@ -18,7 +18,7 @@ object SwaggerParameter {
   implicit val jsonFormat = Json.format[SwaggerParameter]
 }
 
-case class SwaggerOperation(method: String, nickname: String, summary: String, parameters: Seq[SwaggerParameter], dataType: String="string")
+case class SwaggerOperation(method: String, nickname: String, summary: String, parameters: Seq[SwaggerParameter], dataType: String="string", `type`: String="string")
 object SwaggerOperation {
   implicit val jsonFormat = Json.format[SwaggerOperation]
   def simple(method: String, nickname: String, parameters: Seq[SwaggerParameter]) = new SwaggerOperation(method, nickname, nickname, parameters)
