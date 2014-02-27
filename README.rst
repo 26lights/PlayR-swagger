@@ -5,7 +5,7 @@ Play'R - Swagger
 Generate Swagger documentation for your Play'R defined ReST API.
 
 
-This is an extension to the `Play'R project <http://playr.26source.org>`_.
+This is an extension to the `Play'R project <https://github.com/26lights/PlayR>`_.
 
 
 How to use it
