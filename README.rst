@@ -1,0 +1,72 @@
+================
+Play'R - Swagger
+================
+
+Generate Swagger documentation for your Play'R defined ReST API.
+
+
+This is an extension to the `Play'R project <http://playr.26source.org>`_.
+
+
+How to use it
+=============
+
+First, you have to add ``playr-swagger`` to you build dependencies ( ``build.sbt`` ):
+
+.. code-block:: scala
+
+  libraryDependencies += "26lights"  %% "playr"  % "0.1.0-SNAPSHOT"
+
+
+Next, create an instance of ``SwaggerRestDocumentation`` for an existing Play'R router:
+
+.. code-block:: scala
+
+  ...
+  import twentysix.playr.swagger.SwaggerRestDocumentation 
+  ...
+    val apidocs = new SwaggerRestDocumentation(router) // Generate swagger documentation
+  ...
+
+Example using ``playr-tutorial`` project's ``Application`` file:
+
+.. code-block:: scala
+
+  package controllers
+  
+  import play.api._
+  import play.api.mvc._
+  import twentysix.playr._
+  import twentysix.playr.swagger.SwaggerRestDocumentation // Import 
+  
+  object Application extends Controller {
+  
+    val crmApi = RestApiRouter()
+      .add(PersonController)
+      .add(new RestResourceRouter(CompanyController)
+        .add("employee", company => EmployeeController(company))
+        .add("functions", "GET", CompanyController.functions)
+      )
+  
+    val api = RestApiRouter()
+      .add("crm" -> crmApi)
+      .add(new RestResourceRouter(ColorController))
+  
+    val apidocs = new SwaggerRestDocumentation(api)
+  }
+
+
+And finally, just add a reference to the ``apidocs`` in your routes files.
+
+Using the ``playr-tutorial`` project again: 
+
+.. code-block:: nginx
+
+  # Routes
+  # This file defines all application routes (Higher priority routes first)
+  # ~~~~
+
+  ->      /api                          controllers.Application.api
+  ->      /api-docs                     controllers.Application.apidocs
+
+While running your application, if you point your browser to ``/api-docs``, you will get the swagger-ui interface with the generated documentation of your Play'R defined ReST api.
