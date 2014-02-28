@@ -11,7 +11,7 @@ This is an extension to the `Play'R project <https://github.com/26lights/PlayR>`
 How to use it
 =============
 
-First, you have to add ``playr-swagger`` to you build dependencies ( ``build.sbt`` ):
+First, you have to add ``playr-swagger`` to your build dependencies ( ``build.sbt`` ):
 
 .. code-block:: scala
 
