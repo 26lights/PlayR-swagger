@@ -11,9 +11,12 @@ This is an extension to the `Play'R project <https://github.com/26lights/PlayR>`
 How to use it
 =============
 
+
 First, you have to add ``playr-swagger`` to your build dependencies ( ``build.sbt`` ):
 
 .. code-block:: scala
+
+  resolvers += "26Lights snapshots" at "http://build.26source.org/nexus/content/repositories/public-snapshots"
 
   libraryDependencies += "26lights"  %% "playr"  % "0.1.0-SNAPSHOT"
 
