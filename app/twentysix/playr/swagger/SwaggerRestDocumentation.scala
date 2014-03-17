@@ -41,12 +41,17 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
   }
 
   def operationList(path: String, routeInfo: RestRouteInfo, parameters: Seq[SwaggerParameter] = Seq()): List[SwaggerApi] = {
+
+    val bodyParam = SwaggerParameter("body", "body", "body")
+
     var res = List[SwaggerApi]()
     var ops = routeInfo.caps.flatMap{ caps =>
       caps match {
         case ResourceCaps.Read   => Some(SwaggerOperation.simple("GET", s"List ${routeInfo.name}", parameters))
-        case ResourceCaps.Create => Some(SwaggerOperation.simple("POST", s"Create ${routeInfo.name}", parameters))
-        case ResourceCaps.Action => Some(SwaggerOperation.simple(routeInfo.asInstanceOf[ActionRestRouteInfo].method, routeInfo.name, parameters))
+        case ResourceCaps.Create => Some(SwaggerOperation.simple("POST", s"Create ${routeInfo.name}", parameters :+ bodyParam))
+        case ResourceCaps.Action => 
+          val method = routeInfo.asInstanceOf[ActionRestRouteInfo].method
+          Some(SwaggerOperation.simple(method, routeInfo.name, if (Seq("POST","PUT","PATCH").contains(method)) parameters :+ bodyParam else parameters))
         case _ => None
       }
     }
@@ -57,8 +62,8 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
     ops = routeInfo.caps.flatMap{ caps =>
       caps match {
         case ResourceCaps.Read   => Some(SwaggerOperation.simple("GET", s"Read ${routeInfo.name}", subParams))
-        case ResourceCaps.Write  => Some(SwaggerOperation.simple("PUT", s"Write ${routeInfo.name}", subParams))
-        case ResourceCaps.Update => Some(SwaggerOperation.simple("PATCH", s"Update ${routeInfo.name}", subParams))
+        case ResourceCaps.Write  => Some(SwaggerOperation.simple("PUT", s"Write ${routeInfo.name}", subParams :+ bodyParam))
+        case ResourceCaps.Update => Some(SwaggerOperation.simple("PATCH", s"Update ${routeInfo.name}", subParams :+ bodyParam))
         case ResourceCaps.Delete => Some(SwaggerOperation.simple("DELETE", s"Delete ${routeInfo.name}", subParams))
         case _ => None
       }
