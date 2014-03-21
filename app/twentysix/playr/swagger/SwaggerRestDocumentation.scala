@@ -10,23 +10,26 @@ import twentysix.playr._
 
 case class SwaggerResource(path: String, description: String)
 object SwaggerResource {
-  implicit val jsonFormat = Json.format[SwaggerResource]
+  implicit val jsonWrites = Json.writes[SwaggerResource]
 }
 
 case class SwaggerParameter(name: String, description: String, paramType: String="path", `type`: String="string", required: Boolean=true)
 object SwaggerParameter {
-  implicit val jsonFormat = Json.format[SwaggerParameter]
+  implicit val jsonWrites = Json.writes[SwaggerParameter]
 }
 
-case class SwaggerOperation(method: String, nickname: String, summary: String, parameters: Seq[SwaggerParameter], dataType: String="string", `type`: String="string")
+case class SwaggerOperation(method: HttpMethod, nickname: String, summary: String, parameters: Seq[SwaggerParameter], dataType: String="string", `type`: String="string")
 object SwaggerOperation {
-  implicit val jsonFormat = Json.format[SwaggerOperation]
-  def simple(method: String, nickname: String, parameters: Seq[SwaggerParameter]) = new SwaggerOperation(method, nickname, nickname, parameters)
+  implicit val httpMethodJsonWrites = new Writes[HttpMethod] {
+    def writes(method: HttpMethod) = JsString(method.name) 
+  } 
+  implicit val jsonWrites = Json.writes[SwaggerOperation]
+  def simple(method: HttpMethod, nickname: String, parameters: Seq[SwaggerParameter]) = new SwaggerOperation(method, nickname, nickname, parameters)
 }
 
 case class SwaggerApi(path: String, description: String, operations: Traversable[SwaggerOperation])
 object SwaggerApi {
-  implicit val jsonFormat = Json.format[SwaggerApi]
+  implicit val jsonWrites = Json.writes[SwaggerApi]
 }
 
 class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="1.0") extends SimpleRouter {
@@ -47,11 +50,11 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
     var res = List[SwaggerApi]()
     var ops = routeInfo.caps.flatMap{ caps =>
       caps match {
-        case ResourceCaps.Read   => Some(SwaggerOperation.simple("GET", s"List ${routeInfo.name}", parameters))
-        case ResourceCaps.Create => Some(SwaggerOperation.simple("POST", s"Create ${routeInfo.name}", parameters :+ bodyParam))
+        case ResourceCaps.Read   => Some(SwaggerOperation.simple(GET, s"List ${routeInfo.name}", parameters))
+        case ResourceCaps.Create => Some(SwaggerOperation.simple(POST, s"Create ${routeInfo.name}", parameters :+ bodyParam))
         case ResourceCaps.Action => 
           val method = routeInfo.asInstanceOf[ActionRestRouteInfo].method
-          Some(SwaggerOperation.simple(method, routeInfo.name, if (Seq("POST","PUT","PATCH").contains(method)) parameters :+ bodyParam else parameters))
+          Some(SwaggerOperation.simple(method, routeInfo.name, if (Seq(POST, PUT, PATCH).contains(method)) parameters :+ bodyParam else parameters))
         case _ => None
       }
     }
@@ -61,10 +64,10 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
     val subParams = parameters :+ SwaggerParameter(s"${routeInfo.name}_id", s"identified ${routeInfo.name}")
     ops = routeInfo.caps.flatMap{ caps =>
       caps match {
-        case ResourceCaps.Read   => Some(SwaggerOperation.simple("GET", s"Read ${routeInfo.name}", subParams))
-        case ResourceCaps.Write  => Some(SwaggerOperation.simple("PUT", s"Write ${routeInfo.name}", subParams :+ bodyParam))
-        case ResourceCaps.Update => Some(SwaggerOperation.simple("PATCH", s"Update ${routeInfo.name}", subParams :+ bodyParam))
-        case ResourceCaps.Delete => Some(SwaggerOperation.simple("DELETE", s"Delete ${routeInfo.name}", subParams))
+        case ResourceCaps.Read   => Some(SwaggerOperation.simple(GET, s"Read ${routeInfo.name}", subParams))
+        case ResourceCaps.Write  => Some(SwaggerOperation.simple(PUT, s"Write ${routeInfo.name}", subParams :+ bodyParam))
+        case ResourceCaps.Update => Some(SwaggerOperation.simple(PATCH, s"Update ${routeInfo.name}", subParams :+ bodyParam))
+        case ResourceCaps.Delete => Some(SwaggerOperation.simple(DELETE, s"Delete ${routeInfo.name}", subParams))
         case _ => None
       }
     }
