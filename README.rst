@@ -5,8 +5,17 @@ Play'R - Swagger
 Generate Swagger documentation for your Play'R defined ReST API.
 
 
-This is an extension to the `Play'R project <https://github.com/26lights/PlayR>`_
+This is an extension to the `Play'R project <https://github.com/26lights/PlayR>`_ 
 
+.. warning::
+
+  This project depends on a checkout of the swagger-ui project.
+
+  To get this dependency, you have to run the following commands ::
+  
+    $ git clone https://github.com/26lights/PlayR-swagger.git
+    $ cd PlayR-swagger
+    $ git submodule update
 
 How to use it
 =============
