@@ -27,7 +27,7 @@ First, you have to add ``playr-swagger`` to your build dependencies ( ``build.sb
 
   resolvers += "26Lights snapshots" at "http://build.26source.org/nexus/content/repositories/public-snapshots"
 
-  libraryDependencies += "26lights"  %% "playr-swagger"  % "0.1.0-SNAPSHOT"
+  libraryDependencies += "26lights"  %% "playr-swagger"  % "0.2.0-SNAPSHOT"
 
 
 Next, create an instance of ``SwaggerRestDocumentation`` for an existing Play'R router:
