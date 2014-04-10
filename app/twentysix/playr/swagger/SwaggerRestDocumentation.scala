@@ -18,11 +18,16 @@ object SwaggerParameter {
   implicit val jsonWrites = Json.writes[SwaggerParameter]
 }
 
-case class SwaggerOperation(method: HttpMethod, nickname: String, summary: String, parameters: Seq[SwaggerParameter], dataType: String="string", `type`: String="string")
+case class SwaggerOperation(method: HttpMethod,
+                            nickname: String,
+                            summary: String,
+                            parameters: Seq[SwaggerParameter],
+                            `type`: String="string",
+                            consumes: Seq[String] = Seq("application/json", "application/xml", "text/plain"))
 object SwaggerOperation {
   implicit val httpMethodJsonWrites = new Writes[HttpMethod] {
-    def writes(method: HttpMethod) = JsString(method.name) 
-  } 
+    def writes(method: HttpMethod) = JsString(method.name)
+  }
   implicit val jsonWrites = Json.writes[SwaggerOperation]
   def simple(method: HttpMethod, nickname: String, parameters: Seq[SwaggerParameter]) = new SwaggerOperation(method, nickname, nickname, parameters)
 }
@@ -32,7 +37,7 @@ object SwaggerApi {
   implicit val jsonWrites = Json.writes[SwaggerApi]
 }
 
-class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="1.0") extends SimpleRouter {
+class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="1.2") extends SimpleRouter {
   private val SubPathExpression = "^(/([^/]+)).*$".r
 
   val apiMap = restApi.routeResources("").map{ info =>
@@ -52,7 +57,7 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
       caps match {
         case ResourceCaps.Read   => Some(SwaggerOperation.simple(GET, s"List ${routeInfo.name}", parameters))
         case ResourceCaps.Create => Some(SwaggerOperation.simple(POST, s"Create ${routeInfo.name}", parameters :+ bodyParam))
-        case ResourceCaps.Action => 
+        case ResourceCaps.Action =>
           val method = routeInfo.asInstanceOf[ActionRestRouteInfo].method
           Some(SwaggerOperation.simple(method, routeInfo.name, if (Seq(POST, PUT, PATCH).contains(method)) parameters :+ bodyParam else parameters))
         case _ => None
