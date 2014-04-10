@@ -18,7 +18,7 @@ index 53253c8..9486001 100644
 +  val apidocs = new SwaggerRestDocumentation(api)
  }
 diff --git a/samples/playr-tutorial/build.sbt b/samples/playr-tutorial/build.sbt
-index 31120ec..1b7ba18 100644
+index 31120ec..c06f1a2 100644
 --- a/samples/playr-tutorial/build.sbt
 +++ b/samples/playr-tutorial/build.sbt
 @@ -8,7 +8,6 @@ scalacOptions += "-language:reflectiveCalls"
@@ -28,9 +28,9 @@ index 31120ec..1b7ba18 100644
 -lazy val playr = RootProject(file("../.."))
 -
 -lazy val playrTutorial = project in file(".") dependsOn playr
-+libraryDependencies += "26lights"  %% "playr"  % "0.1.0-SNAPSHOT"
++libraryDependencies += "26lights"  %% "playr"  % "0.2.0-SNAPSHOT"
  
-+libraryDependencies += "26lights"  %% "playr-swagger"  % "0.1.0-SNAPSHOT"
++libraryDependencies += "26lights"  %% "playr-swagger"  % "0.2.0-SNAPSHOT"
 diff --git a/samples/playr-tutorial/conf/routes b/samples/playr-tutorial/conf/routes
 index 47b55cd..ef35ff9 100644
 --- a/samples/playr-tutorial/conf/routes
