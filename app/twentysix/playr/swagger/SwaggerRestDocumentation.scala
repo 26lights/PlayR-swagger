@@ -7,6 +7,7 @@ import play.api.mvc._
 import play.api.libs.json._
 import play.api.Logger
 import twentysix.playr._
+import scala.annotation.tailrec
 
 case class SwaggerResource(path: String, description: String)
 object SwaggerResource {
@@ -40,9 +41,12 @@ object SwaggerApi {
 class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="1.2") extends SimpleRouter {
   private val SubPathExpression = "^(/([^/]+)).*$".r
 
-  val apiMap = restApi.routeResources("").map{ info =>
-    info.path -> info
-  }.toMap
+  def _apiSeq(root: String, info: RestRouteInfo): Seq[(String, RestRouteInfo)] = {
+    val (nodes, leafs)  = info.subResources.partition(_.caps.contains(ResourceCaps.Api))
+    leafs.map { sub => ( s"$root/${sub.name}" -> sub )} ++ nodes.flatMap { node=> _apiSeq(s"$root/${node.name}", node) }
+  }
+
+  val apiMap: Map[String, RestRouteInfo] = Map( _apiSeq("", restApi.routeResource) :_* )
 
   def apiList = apiMap.map { case(path, info) =>
     SwaggerResource(path, info.resourceType.toString())
@@ -118,4 +122,10 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
         case _               => None
       }
   }
+}
+
+trait SwaggerDocumentation {
+  this: RestRouter =>
+
+  lazy val swaggerDoc = new SwaggerRestDocumentation(this)
 }

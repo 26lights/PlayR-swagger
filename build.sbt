@@ -9,7 +9,7 @@ resolvers += "26Lights snapshots" at "http://build.26source.org/nexus/content/re
 resolvers += "26Lights releases" at "http://build.26source.org/nexus/content/repositories/public-releases"
 
 libraryDependencies ++= Seq (
-  "26lights"  %% "playr"  % "0.2.0"
+  "26lights"  %% "playr"  % "0.3.0-SNAPSHOT"
 )
 
 play.Project.playScalaSettings
