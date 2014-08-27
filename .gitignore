@@ -16,3 +16,5 @@ dist
 /.cache
 /.target
 /bin
+/samples/playr-swagger-tutorial/.cache
+/samples/playr-swagger-tutorial/bin/
