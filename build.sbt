@@ -1,10 +1,10 @@
 name := "playr-swagger"
 
+organization := "26lights"
+
 scalaVersion := "2.11.2"
 
 releaseSettings
-
-organization := "26lights"
 
 resolvers += "26Lights snapshots" at "http://build.26source.org/nexus/content/repositories/public-snapshots"
 
