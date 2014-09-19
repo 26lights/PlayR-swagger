@@ -114,11 +114,12 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
   private val UiAsset = "^/ui/(.*)$".r
 
   def routeRequest(header: RequestHeader, path: String, method: String): Option[Handler] = {
+      var swaggerUiVersion = "2.0.22"
       path match {
         case ".json"         => Some(resourceListing)
         case ""|"/"          => Some(renderSwaggerUi)
         case ApiListing(api) => apiMap.get(api).map(resourceDesc(api, _))
-        case UiAsset(asset)  => Some(controllers.Assets.at("/public/swagger-ui/dist", asset))
+        case UiAsset(asset)  => Some(controllers.Assets.at(path=s"/META-INF/resources/webjars/swagger-ui/${swaggerUiVersion}", file=asset))
         case _               => None
       }
   }
