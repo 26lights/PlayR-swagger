@@ -14,6 +14,7 @@ dist
 /RUNNING_PID
 /.settings
 /.cache
+/.cache-main
 /.target
 /bin
 /samples/playr-swagger-tutorial/.cache
