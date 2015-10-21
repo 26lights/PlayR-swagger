@@ -38,7 +38,7 @@ object SwaggerApi {
   implicit val jsonWrites = Json.writes[SwaggerApi]
 }
 
-class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="1.2") extends SimpleRouter {
+class SwaggerRestDocumentation(val restApi: RestRouter, val globalParameters: Seq[SwaggerParameter] = Seq(), val apiVersion: String="1.2") extends SimpleRouter {
   private val SubPathExpression = "^(/([^/]+)).*$".r
 
   def _apiSeq(root: String, info: RestRouteInfo): Seq[(String, RestRouteInfo)] = {
@@ -105,7 +105,7 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val apiVersion: String="
         "swaggerVersion" -> "1.2",
         "basePath" -> restApi.prefix,
         "resourcePath" -> path,
-        "apis" -> operationList(path, routeInfo)
+        "apis" -> operationList(path, routeInfo, globalParameters)
     )
     Results.Ok(Json.toJson(res))
   }
