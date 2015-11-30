@@ -59,15 +59,16 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val globalParameters: Se
     var res = List[SwaggerApi]()
     var ops = routeInfo.caps.flatMap{ caps =>
       caps match {
-        case ResourceCaps.Read   => Some(SwaggerOperation.simple(GET, s"List ${routeInfo.name}", parameters))
+        case ResourceCaps.List   => Some(SwaggerOperation.simple(GET, s"List ${routeInfo.name}", parameters))
         case ResourceCaps.Create => Some(SwaggerOperation.simple(POST, s"Create ${routeInfo.name}", parameters :+ bodyParam))
         case ResourceCaps.Action =>
-          val method = routeInfo.asInstanceOf[ActionRestRouteInfo].method
-          Some(SwaggerOperation.simple(method, routeInfo.name, if (Seq(POST, PUT, PATCH).contains(method)) parameters :+ bodyParam else parameters))
+          routeInfo.asInstanceOf[ActionRestRouteInfo].methods.map { method =>
+            SwaggerOperation.simple(method, routeInfo.name, if (Seq(POST, PUT, PATCH).contains(method)) parameters :+ bodyParam else parameters)
+          }
         case _ => None
       }
     }
-    if(!ops.isEmpty)
+    if(ops.nonEmpty)
       res = res :+ new SwaggerApi(path, "Generic operations", ops)
 
     val subParams = parameters :+ SwaggerParameter(s"${routeInfo.name}_id", s"identified ${routeInfo.name}")
@@ -80,7 +81,7 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val globalParameters: Se
         case _ => None
       }
     }
-    if(!ops.isEmpty)
+    if(ops.nonEmpty)
       res = res :+ new SwaggerApi(s"$path/{${routeInfo.name}_id}", "Operations on identified resource", ops)
 
     res ++ routeInfo.subResources.flatMap(info => operationList(s"$path/{${routeInfo.name}_id}/${info.name}", info, subParams))
