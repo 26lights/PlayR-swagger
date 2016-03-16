@@ -1,6 +1,5 @@
 package twentysix.playr.swagger
 
-import play.core.Router
 import scala.runtime.AbstractPartialFunction
 import scala.reflect.runtime.universe._
 import play.api.mvc._
@@ -8,6 +7,7 @@ import play.api.libs.json._
 import play.api.Logger
 import twentysix.playr._
 import scala.annotation.tailrec
+import twentysix.playr.di.PlayRInfoConsumer
 
 case class SwaggerResource(path: String, description: String)
 object SwaggerResource {
@@ -38,7 +38,7 @@ object SwaggerApi {
   implicit val jsonWrites = Json.writes[SwaggerApi]
 }
 
-class SwaggerRestDocumentation(val restApi: RestRouter, val globalParameters: Seq[SwaggerParameter] = Seq(), val apiVersion: String="1.2") extends SimpleRouter {
+class SwaggerRestDocumentation(val apiPrefix: String, val restApi: RestRouter, val globalParameters: Seq[SwaggerParameter] = Seq(), val apiVersion: String="1.2") extends RouterWithPrefix {
   private val SubPathExpression = "^(/([^/]+)).*$".r
 
   def _apiSeq(root: String, info: RestRouteInfo): Seq[(String, RestRouteInfo)] = {
@@ -96,15 +96,15 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val globalParameters: Se
     Results.Ok(Json.toJson(res))
   }
 
-  def renderSwaggerUi = Action {
-    Results.Ok(views.html.swagger(this.prefix+".json", this.prefix+"/ui"))
+  def renderSwaggerUi(prefix: String) = Action {
+    Results.Ok(views.html.swagger(prefix+".json", prefix+"/ui"))
   }
 
   def resourceDesc(path: String, routeInfo: RestRouteInfo) = Action {
     val res = Json.obj(
         "apiVersion" -> apiVersion,
         "swaggerVersion" -> "1.2",
-        "basePath" -> restApi.prefix,
+        "basePath" -> apiPrefix,
         "resourcePath" -> path,
         "apis" -> operationList(path, routeInfo, globalParameters)
     )
@@ -114,20 +114,27 @@ class SwaggerRestDocumentation(val restApi: RestRouter, val globalParameters: Se
   private val ApiListing = "^\\.json(/.*)$".r
   private val UiAsset = "^/ui/(.*)$".r
 
-  def routeRequest(header: RequestHeader, path: String, method: String): Option[Handler] = {
-      var swaggerUiVersion = "2.0.22"
-      path match {
-        case ".json"         => Some(resourceListing)
-        case ""|"/"          => Some(renderSwaggerUi)
-        case ApiListing(api) => apiMap.get(api).map(resourceDesc(api, _))
-        case UiAsset(asset)  => Some(controllers.Assets.at(path=s"/META-INF/resources/webjars/swagger-ui/${swaggerUiVersion}", file=asset))
-        case _               => None
-      }
+  override def routesWithPrefix(prefix: String) = scala.Function.unlift{ requestHeader =>
+    Logger.debug(s"swagger ${requestHeader.path}")
+    var swaggerUiVersion = "2.0.24"
+    requestHeader.path match {
+      case ".json"         => Some(resourceListing)
+      case ""|"/"          => Some(renderSwaggerUi(apiPrefix+prefix))
+      case ApiListing(api) => apiMap.get(api).map(resourceDesc(api, _))
+      case UiAsset(asset)  => Some(controllers.Assets.at(path=s"/META-INF/resources/webjars/swagger-ui/${swaggerUiVersion}", file=asset))
+      case _               => None
+    }
   }
+
+  def routes = routesWithPrefix("")
 }
 
 trait SwaggerDocumentation {
   this: RestRouter =>
 
-  lazy val swaggerDoc = new SwaggerRestDocumentation(this)
+  lazy val swaggerDoc = new SwaggerRestDocumentation("", this)
+}
+
+object SwaggerDocumentation extends PlayRInfoConsumer{
+  def apply(prefix: String, router: RestRouter) = new SwaggerRestDocumentation(prefix, router)
 }
