@@ -4,7 +4,6 @@ import scala.runtime.AbstractPartialFunction
 import scala.reflect.runtime.universe._
 import play.api.mvc._
 import play.api.libs.json._
-import play.api.Logger
 import twentysix.playr._
 import scala.annotation.tailrec
 import twentysix.playr.di.PlayRInfoConsumer
@@ -115,7 +114,6 @@ class SwaggerRestDocumentation(val apiPrefix: String, val restApi: RestRouter, v
   private val UiAsset = "^/ui/(.*)$".r
 
   override def routesWithPrefix(prefix: String) = scala.Function.unlift{ requestHeader =>
-    Logger.debug(s"swagger ${requestHeader.path}")
     var swaggerUiVersion = "2.0.24"
     requestHeader.path match {
       case ".json"         => Some(resourceListing)
