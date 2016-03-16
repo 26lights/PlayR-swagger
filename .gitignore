@@ -18,6 +18,7 @@ dist
 /.target
 /bin
 /samples/playr-swagger-tutorial/.cache
+/samples/playr-swagger-tutorial/.cache-main
 /samples/playr-swagger-tutorial/bin/
 /samples/playr-swagger-tutorial/.classpath
 /samples/playr-swagger-tutorial/.project
