@@ -9,7 +9,7 @@ resolvers += "26Lights snapshots" at "http://build.26source.org/nexus/content/re
 resolvers += "26Lights releases" at "http://build.26source.org/nexus/content/repositories/public-releases"
 
 libraryDependencies ++= Seq (
-  "26lights"    %% "playr"      % "0.7.0-SNAPSHOT",
+  "26lights"    %% "playr"      % "0.7.0",
   "org.webjars"  % "swagger-ui" % "2.0.24"
 )
 
