@@ -2,15 +2,13 @@ name := "playr-swagger"
 
 organization := "26lights"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.12"
 
-resolvers += "26Lights snapshots" at "http://build.26source.org/nexus/content/repositories/public-snapshots"
+resolvers += "local-repo" at sys.env.get("DIST_PATH").map(file).getOrElse(target.value / "dist").toURI.toASCIIString
 
-resolvers += "26Lights releases" at "http://build.26source.org/nexus/content/repositories/public-releases"
-
-libraryDependencies ++= Seq (
-  "26lights"    %% "playr"      % "0.7.0",
-  "org.webjars"  % "swagger-ui" % "2.0.24"
+libraryDependencies ++= Seq(
+  "26lights" %% "playr" % "0.9.0-SNAPSHOT",
+  "org.webjars" % "swagger-ui" % "2.0.24"
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)

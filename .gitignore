@@ -23,3 +23,6 @@ dist
 /samples/playr-swagger-tutorial/.classpath
 /samples/playr-swagger-tutorial/.project
 /samples/playr-swagger-tutorial/.settings
+.bloop
+.metals
+metals.sbt
