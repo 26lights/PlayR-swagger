@@ -168,3 +168,10 @@ trait SwaggerDocumentation {
 
   lazy val swaggerDoc = new SwaggerRestDocumentation("", this)(Action, assets)
 }
+
+object SwaggerDocumentation {
+  def withController(controller: BaseController, assets: controllers.Assets) = new PlayRInfoConsumer {
+    def apply(prefix: String, api: RestRouter): ConsumerRoutes =
+      new SwaggerRestDocumentation("", api)(controller.Action, assets)
+  }
+}

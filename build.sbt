@@ -2,7 +2,7 @@ name := "playr-swagger"
 
 organization := "26lights"
 
-scalaVersion := "2.11.12"
+scalaVersion := "2.12.10"
 
 resolvers += "local-repo" at sys.env.get("DIST_PATH").map(file).getOrElse(target.value / "dist").toURI.toASCIIString
 
